@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from aiogoogle import Aiogoogle
 
 from app.services.constants import Constants
+from app.services.exceptions import TableLimitError
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
@@ -34,17 +37,36 @@ async def spreadsheets_update_value(
 ) -> None:
     service = await wrapper_services.discover('sheets',
                                               Constants.SHEET_VERSION)
+    now_date_time = datetime.now().strftime(Constants.FORMAT)
+    table_values = [
+        ['Отчёт от', now_date_time],
+        ['Топ проектов по скорости закрытия'],
+        ['Название проекта', 'Время сбора', 'Описание']
+    ]
+    update_body = {
+        'majorDimension': 'ROWS',
+        'values': table_values
+    }
     for project in projects:
         new_row = [str(project.name),
                    str(project.close_date - project.create_date),
                    str(project.description)]
-        Constants.TABLE_VALUES.append(new_row)
-
+        table_values.append(new_row)
+    current_rows_numbers = len(table_values)
+    current_columns_numbers = max(len(row) for row in table_values)
+    if current_rows_numbers > Constants.ROWS_COUNT:
+        raise TableLimitError(
+            Constants.ROWS_EXCEED_LIMIT.format(
+                current_rows_numbers=current_rows_numbers))
+    if current_columns_numbers > Constants.COLUMN_COUNT:
+        raise TableLimitError(
+            Constants.COLUMNS_EXCEED_LIMIT.format(
+                current_columns_numbers=current_columns_numbers))
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheetid,
-            range='A1:E30',
+            range=Constants.RANGE_TEMPLATE.format(
+                rows=current_rows_numbers,
+                columns=current_columns_numbers),
             valueInputOption='USER_ENTERED',
-            json=Constants.UPDATE_BODY
-        )
-    )
+            json=update_body))

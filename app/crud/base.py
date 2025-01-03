@@ -92,3 +92,13 @@ class CRUDBase:
             select(self.model).where(self.model.user_id == user.id)
         )
         return records.scalars().all()
+
+    async def get_projects_by_completion_rate(
+        self,
+        session: AsyncSession,
+    ) -> list:
+        projects = await session.execute(
+            select(self.model)
+            .where(self.model.fully_invested.is_(True))
+            .order_by(self.model.close_date - self.model.create_date))
+        return projects.scalars().all()
