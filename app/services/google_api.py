@@ -9,8 +9,13 @@ from app.services.exceptions import TableLimitError
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     service = await wrapper_services.discover('sheets',
                                               Constants.SHEET_VERSION)
+    spreadsheet_body = Constants.SPREADSHEET_BODY.copy()
+    spreadsheet_body['sheets'][0]['properties']['gridProperties'] = {
+        'rowCount': Constants.ROWS_COUNT,
+        'columnCount': Constants.COLUMN_COUNT
+    }
     response = await wrapper_services.as_service_account(
-        service.spreadsheets.create(json=Constants.SPREADSHEET_BODY)
+        service.spreadsheets.create(json=spreadsheet_body)
     )
     spreadsheetid = response['spreadsheetId']
     return spreadsheetid
@@ -39,10 +44,9 @@ async def spreadsheets_update_value(
                                               Constants.SHEET_VERSION)
     now_date_time = datetime.now().strftime(Constants.FORMAT)
     table_values = [
-        ['Отчёт от', now_date_time],
-        ['Топ проектов по скорости закрытия'],
-        ['Название проекта', 'Время сбора', 'Описание']
+        [Constants.TABLE_VALUES[0][0], now_date_time]
     ]
+    table_values.extend(Constants.TABLE_VALUES[1:])
     update_body = {
         'majorDimension': 'ROWS',
         'values': table_values

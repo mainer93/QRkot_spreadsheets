@@ -67,14 +67,6 @@ class CRUDBase:
         await session.delete(db_obj)
         return db_obj
 
-    async def remove(
-            self,
-            db_obj,
-            session: AsyncSession,
-    ):
-        await session.delete(db_obj)
-        return db_obj
-
     async def get_project_by_name(
             self,
             name: str,
