@@ -14,10 +14,7 @@ class Constants:
             'locale': 'ru_RU'},
         'sheets': [{'properties': {'sheetType': 'GRID',
                                    'sheetId': SHEET_ID,
-                                   'title': SHEET_TITLE,
-                                   'gridProperties': {
-                                       'rowCount': ROWS_COUNT,
-                                       'columnCount': COLUMN_COUNT}}}]}
+                                   'title': SHEET_TITLE}}]}
     TABLE_VALUES = [
         ['Отчёт от', '{now_date_time}'],
         ['Топ проектов по скорости закрытия'],
