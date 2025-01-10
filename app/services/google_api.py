@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 
 from aiogoogle import Aiogoogle
@@ -9,7 +10,7 @@ from app.services.exceptions import TableLimitError
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     service = await wrapper_services.discover('sheets',
                                               Constants.SHEET_VERSION)
-    spreadsheet_body = Constants.SPREADSHEET_BODY.copy()
+    spreadsheet_body = copy.deepcopy(Constants.SPREADSHEET_BODY)
     spreadsheet_body['sheets'][0]['properties']['gridProperties'] = {
         'rowCount': Constants.ROWS_COUNT,
         'columnCount': Constants.COLUMN_COUNT
@@ -42,11 +43,9 @@ async def spreadsheets_update_value(
 ) -> None:
     service = await wrapper_services.discover('sheets',
                                               Constants.SHEET_VERSION)
-    now_date_time = datetime.now().strftime(Constants.FORMAT)
-    table_values = [
-        [Constants.TABLE_VALUES[0][0], now_date_time]
-    ]
-    table_values.extend(Constants.TABLE_VALUES[1:])
+    table_values = copy.deepcopy(Constants.TABLE_VALUES)
+    table_values[0][1] = table_values[0][1].format(
+        now_date_time=datetime.now().strftime(Constants.FORMAT))
     update_body = {
         'majorDimension': 'ROWS',
         'values': table_values
